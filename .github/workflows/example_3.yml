@@ -1,0 +1,36 @@
+name: Add new file to repository
+
+on:
+  workflow_dispatch:
+    inputs:
+        file_contents:
+            description: "Enter the contents of the file to be created"
+            required: true
+            type: string
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+    create-file:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Create a new file
+              run: |
+                touch new_file.md
+                echo "${{ inputs.file_contents }}" >> new_file.md
+                echo "File 'new_file.md' has been created."
+                cat new_file.md
+            - uses: actions/upload-artifact@v4
+              with:
+                name: new_markdown_file
+                path: new_file.md
+            - name: Checkout repository
+              uses: actions/checkout@v6
+            - name: Create an issue using action
+              uses: JasonEtco/create-an-issue@v2
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with: 
+                filename: ./new_file.md
